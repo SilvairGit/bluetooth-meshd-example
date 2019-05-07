@@ -12,11 +12,11 @@ class ElementInterface:
         self.index = index
         self.location = location
         self.models = models or []
-        self.vendor_models = vendor_models or {}
+        self.vendor_models = vendor_models or []
         self.logger = logging.getLogger('ElementInterface.%i' % index)
 
     @ravel.propgetter(name='VendorModels',
-                      type='a{qq}',
+                      type='a(qq)',
                       change_notification=dbus.Introspection.PROP_CHANGE_NOTIFICATION.INVALIDATES)
     def get_models(self):
         return self.vendor_models
