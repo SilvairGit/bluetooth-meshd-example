@@ -3,7 +3,7 @@ import logging
 
 import dbussy as dbus
 import ravel
-
+import os
 
 @ravel.interface(ravel.INTERFACE.SERVER, name='org.bluez.mesh.Element1')
 class ElementInterface:
@@ -110,14 +110,17 @@ class ApplicationInterface:
         self.application = application
         self.logger = logging.getLogger('ApplicationInterface')
         self.join_completed = asyncio.Future()
-        self.token_path = 'meshd_example/token.txt'
+        self.token_path = '~/.cache/bluetooth-meshd-example/'
 
     @ravel.method(name='JoinComplete', in_signature='t', out_signature='')
     async def join_complete(self, token):
         self.logger.info('Join complete: %x', token)
         self.join_completed.set_result(token)
 
-        with open(self.token_path, 'w') as file:
+        if not os.path.exists(self.token_path):
+            os.makedirs(self.token_path)
+
+        with open(self.token_path + 'token.txt', 'w') as file:
             file.write("%x" % token)
 
     @ravel.method(name='JoinFailed', in_signature='s', out_signature='')
