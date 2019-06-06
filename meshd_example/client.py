@@ -81,7 +81,7 @@ class Application:
 async def client(bus):
 
     try:
-        with open("meshd_example/token.txt", 'r') as file:
+        with open('~/.cache/bluetooth-meshd-example/token.txt', 'r') as file:
             token = file.readline()
     except FileNotFoundError:
         token = token_hex(8)
@@ -106,4 +106,8 @@ def main():
     bus = ravel.system_bus(managed_objects=True)
     bus.attach_asyncio(loop)
 
-    loop.run_until_complete(client(bus))
+    try:
+        loop.run_until_complete(client(bus))
+
+    except KeyboardInterrupt:
+        pass
