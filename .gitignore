@@ -1,3 +1,4 @@
 .virtualenv
 __pycache__
 *.egg-info
+meshd_example/token.txt
