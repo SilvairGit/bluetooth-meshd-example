@@ -6,6 +6,7 @@ import uuid
 import dbussy as dbus
 import ravel
 
+from secrets import token_hex
 from meshd_example.interfaces import (ApplicationInterface,
                                       ElementInterface,
                                       ProvisionAgentInterface)
@@ -78,9 +79,16 @@ class Application:
 
 
 async def client(bus):
+
+    try:
+        with open("meshd_example/token.txt", 'r') as file:
+            token = file.readline()
+    except FileNotFoundError:
+        token = token_hex(8)
+
     application = Application(bus,
                               uuid.UUID('9c791e88-7acb-42e5-95ab-ab75cb74d774'),
-                              token='9dbbbf60c5376e3')
+                              token=token)
 
     await application.join()
 
