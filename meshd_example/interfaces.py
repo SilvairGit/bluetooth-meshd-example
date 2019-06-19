@@ -15,12 +15,6 @@ class ElementInterface:
         self.vendor_models = vendor_models or []
         self.logger = logging.getLogger('ElementInterface.%i' % index)
 
-    @ravel.propgetter(name='VendorModels',
-                      type='a(qq)',
-                      change_notification=dbus.Introspection.PROP_CHANGE_NOTIFICATION.INVALIDATES)
-    def get_models(self):
-        return self.vendor_models
-
     @ravel.method(name='MessageReceived', in_signature='qqbay', out_signature='')
     def message_received(self, source, key_index, subscription, data):
         self.logger.info('Message from %04x [key %04x]: %s', source, key_index, bytes(data).hex())
@@ -36,19 +30,29 @@ class ElementInterface:
                       type='y',
                       change_notification=dbus.Introspection.PROP_CHANGE_NOTIFICATION.INVALIDATES)
     def get_index(self):
+        self.logger.info('Index: %d', self.index)
         return self.index
 
     @ravel.propgetter(name='Location',
                       type='q',
                       change_notification=dbus.Introspection.PROP_CHANGE_NOTIFICATION.INVALIDATES)
     def get_location(self):
+        self.logger.info('Location: %d', self.location)
         return self.location
 
     @ravel.propgetter(name='Models',
                       type='aq',
                       change_notification=dbus.Introspection.PROP_CHANGE_NOTIFICATION.INVALIDATES)
-    def get_vendor_models(self):
+    def get_models(self):
+        self.logger.info('Models: %s', self.models)
         return self.models
+
+    @ravel.propgetter(name='VendorModels',
+                      type='a(qq)',
+                      change_notification=dbus.Introspection.PROP_CHANGE_NOTIFICATION.INVALIDATES)
+    def get_vendor_models(self):
+        self.logger.info('VendorModels: %s', self.vendor_models)
+        return self.vendor_models
 
 
 @ravel.interface(ravel.INTERFACE.SERVER, name='org.bluez.mesh.ProvisionAgent1')
@@ -110,18 +114,11 @@ class ApplicationInterface:
         self.application = application
         self.logger = logging.getLogger('ApplicationInterface')
         self.join_completed = asyncio.Future()
-        self.token_path = '~/.cache/bluetooth-meshd-example/'
 
     @ravel.method(name='JoinComplete', in_signature='t', out_signature='')
     async def join_complete(self, token):
         self.logger.info('Join complete: %x', token)
         self.join_completed.set_result(token)
-
-        if not os.path.exists(self.token_path):
-            os.makedirs(self.token_path)
-
-        with open(self.token_path + 'token.txt', 'w') as file:
-            file.write("%x" % token)
 
     @ravel.method(name='JoinFailed', in_signature='s', out_signature='')
     async def join_failed(self, reason):
